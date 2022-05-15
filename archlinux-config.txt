@@ -1,0 +1,172 @@
+
+********************
+*                  *
+*   AUDIO DELL-G3  *
+*                  *
+********************
+
+AUDIO (Resolver problemas de audio)
+        - echo "options snd-hda-intel dmic_detect=0" | sudo tee -a /etc/modprobe.d/alsa-base.conf
+        - echo "blacklist snd_soc_skl" | sudo tee -a /etc/modprobe.d/blacklist.conf
+
++++++++++++++++++++
++                 +
++      FONTS      +
++                 +
++++++++++++++++++++
+        sudo pacman -S powerline-fonts ttf-nerd-fonts-symbols-mono ttf-roboto ttf-roboto-mono
+
++++++++++++++++++++
++                 +
++    BROADCOM     +
++                 +
++++++++++++++++++++
+[Kernel Linux (normal)]
+    sudo pacman -S broadcom-wl
+
+[Kernel Linux-LTS, Hardened, Zen]
+        sudo pacman -S broadcom-wl-dkms
+        sudo pacman -S wireless-regdb
+(https://bbs.archlinux.org/viewtopic.php?id=240157)
+
+
+++++++++++++++++++++++++++++++++++++++++++
+++               KDE PLASMA            + +
+++++++++++++++++++++++++++++++++++++++++++
+
+[SDDM - Language]
+        sudo echo -e '\n[Language]\nsetxkbmap latam' >> /usr/share/sddm/scripts/Xsetup
+
+[SDDM - Touchpad]
+        sudo nano /etc/X11/xorg.conf.d/20-touchpad.conf
+        Section "InputClass"
+                Identifier "libinput touchpad catchall"
+                MatchIsTouchpad "on"
+                MatchDevicePath "/dev/input/event*"
+                Driver "libinput"
+
+                Option "Tapping" "on"
+                Option "NaturalScrolling" "on"
+                Option "MiddleEmulation" "on"
+                Option "DisableWhileTyping" "on"
+        EndSection
+
+[Discover - Software]
+        sudo pacman -S packagekit-qt5
+
+
++++++++++++++++++++
++                 +
++      GNOME      +
++                 +
++++++++++++++++++++
+[Gnome Software]
+sudo pacman -S gnome-software-packagekit-plugin
+
+[Gnome Terminal Transparency]
+        git clone https://aur.archlinux.org/gnome-terminal-transparency.git
+        cd gnome-terminal-transparency && makepkg -si
+
+[Gnome - GDM Touchpad Clicks]
+        sudo mkdir -p /etc/dconf/db/gdm.d
+        sudo nano /etc/dconf/db/gdm.d/06-tap-to-click
+- ADD
+        [org/gnome/desktop/peripherals/touchpad]
+        tap-to-click=true
+- EXECUTE
+        sudo -u gdm dbus-launch gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click 'true'
+
+[Gnome - GDM Keyboard Layout]
+- Show the keyboard laoyouts
+        cat -n /usr/share/X11/xkb/rules/base.lst | grep -ie'spanish'
+
+- Set the Keyboard Layout
+        localectl set-x11-keymap latam
+
+[Gnome - Themes]
+- Qogir:
+     https://www.gnome-look.org/p/1230631/
+- Qogir GitHub:
+     https://github.com/vinceliuice/Qogir-theme
+- Install Logo on Nautilus:
+    ./install.sh -l arch
+
+[Gnome - Icon]
+- Icon Name: Papirus - yaru
+- Link: https://www.gnome-look.org/p/1166289
+
+[ EXTENSIONS ]
+- No Overview at start up
+- dash to dock
+- blur my shell
+
+[ Cursor ]
+- Breeze
+
++++++++++++++++++++
++                 +
++    BLUETOOTH    +
++                 +
++++++++++++++++++++
+- ver problema
+    journalctl -b | grep -e'Bluetooth' -e'not' -e'found'
+    Repositorio oficial  https://github.com/winterheart/broadcom-bt-firmware
+- Firmware BROADCOM AUR:
+    git clone https://aur.archlinux.org/broadcom-bt-firmware-git.git
+    makepkg -si
+- Instalar utilerias
+    sudo pacman -S bluez-utils
+    sudo pacman -S pulseaudio-bluetooth (BT - headset - speakers)
+
++++++++++++++++++++
++                 +
++       TIME      +
++                 +
++++++++++++++++++++
+        sudo timedatectl set-local-rtc 1
+
+++++++++++++++++++++
++                  +
++       GRUB       +
++                  +
+++++++++++++++++++++
+        sudo nano /etc/grub.d/40_custom
+-ADD
+
+        menuentry "Windows 10" --class windows {
+        insmod part_gpt
+        insmod fat
+        insmod search_fs_uuid
+        insmod chain
+        search --fs-uuid --no-floppy --set=root DC74-9F1C
+        chainloader (${root})/efi/Microsoft/Boot/bootmgfw.efi
+        }
+
+
+*******************
+*                 *
+*     NVIDIA      *
+*                 *
+*******************
+[ LINKS ]
+https://www.freecodecamp.org/news/how-to-install-arch-linux/#how-to-install-xorg
+
+[NVIDIA Drivers]
+        sudo pacman -S nvidia-lts nvidia-utils nvidia-settings opencl-nvidia
+
+LINK -> http://www.franaramayo.com/instalar-los-drivers-de-nvidia-en-arch-linux/
+
+[FIX SCREEN TEARING]
+        sudo touch /etc/modprobe.d/nvidia-drm-nomodeset.conf
+        echo "options nvidia-drm modeset=1" >> /etc/modprobe.d/nvidia-drm-nomodeset.conf
+        sudo mkinitcpio -P
+
+LINK -> https://ubuntuhandbook.org/index.php/2018/07/fix-screen-tearing-ubuntu-18-04-optimus-laptops/
+
+
+[NVIDIA Optimus]
+https://wiki.archlinux.org/title/NVIDIA_Optimus
+
+[TUTORIAL]
+https://www.youtube.com/watch?v=AOjOd3wIPu8
+
